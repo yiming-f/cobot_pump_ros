@@ -58,7 +58,8 @@ endif()
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  vacuumService.srv
+  startPump.srv
+  stopPump.srv
 )
 
 ## Generate actions in the 'action' folder
