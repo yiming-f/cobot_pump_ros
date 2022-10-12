@@ -1,3 +1,4 @@
 int64 pressure
+int64 timeout_ms
 ---
-int64 sum
+bool vacuumSuccess

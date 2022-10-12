@@ -12,12 +12,13 @@
 #include "ros/ros.h"
 #include "cobot_pump_ros/startPump.h"
 #include "cobot_pump_ros/stopPump.h"
+#include "cobot_pump_ros/dropItem.h"
 
 using namespace std;
 
 // TODO - make this ip changeable when you create the node, i.e via arguments
 // Instantiate vacuum gripper with our ip address
-franka::VacuumGripper vacuum_gripper("192.168.130.1");
+// franka::VacuumGripper vacuum_gripper("192.168.130.1");
 
 //------------------------------------------------------------
 //
@@ -25,8 +26,19 @@ franka::VacuumGripper vacuum_gripper("192.168.130.1");
 //
 //------------------------------------------------------------
 bool startPump(cobot_pump_ros::startPump::Request &req, cobot_pump_ros::startPump::Response &res){
-  
-    vacuum_gripper.vacuum(500, std::chrono::milliseconds(5000));
+    franka::VacuumGripper vacuum_gripper("192.168.130.1");
+    
+    try{
+
+        res.vacuumSuccess = vacuum_gripper.vacuum(req.pressure, std::chrono::milliseconds(req.timeout_ms));
+    }
+    catch(franka::CommandException){
+        cout << "we received an command exception" << endl;
+    }
+    catch(franka::NetworkException){
+        cout << "we received an netowkr exception" << endl;
+    }
+    
     return true;
 }
 
@@ -36,7 +48,28 @@ bool startPump(cobot_pump_ros::startPump::Request &req, cobot_pump_ros::startPum
 //
 //------------------------------------------------------------
 bool stopPump(cobot_pump_ros::stopPump::Request &req, cobot_pump_ros::stopPump::Response &res){
-    vacuum_gripper.stop();
+    franka::VacuumGripper vacuum_gripper("192.168.130.1");
+    res.success = vacuum_gripper.stop();
+    return true;
+}
+
+//------------------------------------------------------------
+//
+//                      Drops objects
+//
+//------------------------------------------------------------
+bool dropItem(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros::dropItem::Response &res){
+    franka::VacuumGripper vacuum_gripper("192.168.130.1");
+
+    try{
+        res.success = vacuum_gripper.dropOff(std::chrono::milliseconds(req.timeout_ms));
+    }
+    catch(franka::CommandException){
+        cout << "we received an command exception" << endl;
+    }
+    catch(franka::NetworkException){
+        cout << "we received an netowkr exception" << endl;
+    }
     return true;
 }
 
@@ -45,8 +78,8 @@ int main(int argc, char **argv){
     cout << "Hello, world!, Initial vacuum testing "<< endl;
 
     // Print a vacuum gripper state.
-    franka::VacuumGripperState vacuum_gripper_state = vacuum_gripper.readOnce();
-    std::cout << "Initial vacuum gripper state: " << vacuum_gripper_state << std::endl;
+    //franka::VacuumGripperState vacuum_gripper_state = vacuum_gripper.readOnce();
+    //std::cout << "Initial vacuum gripper state: " << vacuum_gripper_state << std::endl;
 
 
 
@@ -58,8 +91,9 @@ int main(int argc, char **argv){
     ros::NodeHandle n;
 
     // Advertise services for the vacuum gripper
-    ros::ServiceServer service = n.advertiseService("startPump", startPump);
-    ros::ServiceServer service2 = n.advertiseService("stopPump", stopPump);
+    ros::ServiceServer startPump_Service = n.advertiseService("startPump", startPump);
+    ros::ServiceServer stopPump_Service = n.advertiseService("stopPump", stopPump);
+    ros::ServiceServer dropItem_Service = n.advertiseService("dropItem", dropItem);
 
     ros::spin();
 }
