@@ -1,14 +1,18 @@
 #pragma once
 
+// General Includes
 #include <cmath>
 #include <string>
 #include <iostream>
 #include <thread>
 
+// libFranka includes
 #include <franka/robot.h>
 #include <franka/vacuum_gripper.h>
+#include <franka/vacuum_gripper_state.h>
 #include <franka/exception.h>
 
+// ROS + services includes
 #include "ros/ros.h"
 #include "cobot_pump_ros/startPump.h"
 #include "cobot_pump_ros/stopPump.h"
@@ -29,14 +33,27 @@ bool startPump(cobot_pump_ros::startPump::Request &req, cobot_pump_ros::startPum
     franka::VacuumGripper vacuum_gripper("192.168.130.1");
     
     try{
-
-        res.vacuumSuccess = vacuum_gripper.vacuum(req.pressure, std::chrono::milliseconds(req.timeout_ms));
+        vacuum_gripper.vacuum(req.pressure, std::chrono::milliseconds(req.timeout_ms));
     }
     catch(franka::CommandException){
-        cout << "we received an command exception" << endl;
+        cout << "START PUMP - Command exception" << endl;
     }
     catch(franka::NetworkException){
-        cout << "we received an netowkr exception" << endl;
+        cout << "START PUMP - Network exception" << endl;
+    }
+
+    franka::VacuumGripperState vacuum_gripper_state = vacuum_gripper.readOnce();
+    std::cout << "vacuum state is: " << vacuum_gripper_state << std::endl;
+
+    if(vacuum_gripper_state.in_control_range == true){
+        std::cout << "vacuum in correct control range: " << vacuum_gripper_state << std::endl;
+        res.vacuumSuccess = true;
+    }
+    else{
+        // automatically stop the pump if vacuum not established
+        vacuum_gripper.stop();
+        res.vacuumSuccess = false;
+
     }
     
     return true;
@@ -49,7 +66,17 @@ bool startPump(cobot_pump_ros::startPump::Request &req, cobot_pump_ros::startPum
 //------------------------------------------------------------
 bool stopPump(cobot_pump_ros::stopPump::Request &req, cobot_pump_ros::stopPump::Response &res){
     franka::VacuumGripper vacuum_gripper("192.168.130.1");
-    res.success = vacuum_gripper.stop();
+
+    try{
+        res.success = vacuum_gripper.stop();
+    }
+    catch(franka::CommandException){
+        cout << "STOP PUMP - Command exception" << endl;
+    }
+    catch(franka::NetworkException){
+        cout << "STOP PUMP - Network exception" << endl;
+    }
+    
     return true;
 }
 
@@ -60,16 +87,26 @@ bool stopPump(cobot_pump_ros::stopPump::Request &req, cobot_pump_ros::stopPump::
 //------------------------------------------------------------
 bool dropItem(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros::dropItem::Response &res){
     franka::VacuumGripper vacuum_gripper("192.168.130.1");
+    res.success = false;
 
     try{
-        res.success = vacuum_gripper.dropOff(std::chrono::milliseconds(req.timeout_ms));
+        vacuum_gripper.dropOff(std::chrono::milliseconds(req.timeout_ms));
     }
     catch(franka::CommandException){
-        cout << "we received an command exception" << endl;
+        cout << "DROP ITEM - Command exception" << endl;
     }
     catch(franka::NetworkException){
-        cout << "we received an netowkr exception" << endl;
+        cout << "DROP ITEM - Network exception" << endl;
     }
+
+    franka::VacuumGripperState vacuum_gripper_state = vacuum_gripper.readOnce();
+    std::cout << "vacuum state is: " << vacuum_gripper_state << std::endl;
+
+    if(vacuum_gripper_state.part_detached == false){
+        std::cout << "item dropped: " << vacuum_gripper_state << std::endl;
+        res.success = true;
+    }
+
     return true;
 }
 
