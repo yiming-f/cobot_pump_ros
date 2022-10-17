@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(cobot_pump_ros)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,16 +11,17 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  message_generation
+  control_msgs
+  sensor_msgs
+  xmlrpcpp
+  actionlib_msgs
 )
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
-
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+find_package(Franka 0.9.0 QUIET)
+if(NOT Franka_FOUND)
+  find_package(Franka 0.8.0 REQUIRED)
+endif()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -54,11 +55,14 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  startPump.srv
+  stopPump.srv
+  dropItem.srv
+  readState.srv
+  checkItemAttached.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -68,10 +72,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -103,11 +107,65 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES cobot_pump_ros
-#  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
+  INCLUDE_DIRS include
+  LIBRARIES franka_gripper
+  CATKIN_DEPENDS roscpp
+                 message_runtime
+                 control_msgs
+                 sensor_msgs
+                 xmlrpcpp
+  DEPENDS Franka
 )
+
+# add_library(franka_gripper
+#   src/cobot_pump.cpp
+# )
+
+add_executable(cobot_pump
+  src/cobot_pump.cpp
+)
+
+add_executable(cobot_pump_node
+  src/cobot_pump_node.cpp
+)
+
+add_dependencies(cobot_pump
+  ${catkin_EXPORTED_TARGETS}
+)
+
+add_dependencies(cobot_pump_node
+  ${catkin_EXPORTED_TARGETS}
+)
+
+target_link_libraries(cobot_pump
+  ${Franka_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(cobot_pump_node
+  ${Franka_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
+
+target_include_directories(cobot_pump SYSTEM PUBLIC
+  ${Franka_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+)
+
+target_include_directories(cobot_pump_node SYSTEM PUBLIC
+  ${Franka_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+)
+
+target_include_directories(cobot_pump PUBLIC
+  include
+)
+
+target_include_directories(cobot_pump_node PUBLIC
+  include
+)
+
+
 
 ###########
 ## Build ##
@@ -120,36 +178,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/cobot_pump_ros.cpp
-# )
-
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Declare a C++ executable
-## With catkin_make all packages are built within a single CMake context
-## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/cobot_pump_ros_node.cpp)
-
-## Rename C++ executable without prefix
-## The above recommended prefix causes long target names, the following renames the
-## target back to the shorter version for ease of user use
-## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
-# set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
-
-## Add cmake target dependencies of the executable
-## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
-
 #############
 ## Install ##
 #############
@@ -159,10 +187,10 @@ include_directories(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# catkin_install_python(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+catkin_install_python(PROGRAMS
+  scripts/basic_demo.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
