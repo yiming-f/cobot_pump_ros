@@ -14,30 +14,41 @@ def basic_demo():
 
     try:
         
+        ## Good pressure values seem to be around 100 - 300 for a fairly heavy box of quaker oats
         # specifiedNumber = 10 * mBar, so 300 = 3Bar
         vacuumStrength = 300
         timeout_ms = 1000
         response = start_pump(vacuumStrength, timeout_ms)
         print("status of vacuum is " + str(response.vacuumSuccess))
 
-        if(response.vacuumSuccess == True):
+        if(response.vacuumSuccess):
             # move end effector up slightly
 
             # check item still attached
             response = check_item_attached()
-            print("item is attached: " + str(response.itemAttached))
+            if(response.itemAttached):
+                print("item still attached")
+            else:
+                print("item lost")
 
-            # Wait 3 seconds
+            # Wait 3 seconds and check object is still attached
             time.sleep(3)
             response = check_item_attached()
-            print("item is attached after wait: " + str(response.itemAttached))
+            if(response.itemAttached):
+                print("item still attached")
+            else:
+                print("item lost")
 
             # drop item 
             response = drop_item(timeout_ms)
+            print("dropping item now")
 
             # check item dropped
             response = check_item_attached()
-            print("item is attached: " + str(response.itemAttached))
+            if(response.itemAttached):
+                print("item has been detahced")
+            else:
+                print("ERROR: item has not been detached")
 
         else: 
             print("vacuum not established")
