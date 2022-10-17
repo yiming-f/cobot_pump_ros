@@ -14,7 +14,10 @@ def basic_demo():
 
     try:
         
-        response = start_pump(300, 1000)
+        # specifiedNumber = 10 * mBar, so 300 = 3Bar
+        vacuumStrength = 300
+        timeout_ms = 1000
+        response = start_pump(vacuumStrength, timeout_ms)
         print("status of vacuum is " + str(response.vacuumSuccess))
 
         if(response.vacuumSuccess == True):
@@ -24,11 +27,13 @@ def basic_demo():
             response = check_item_attached()
             print("item is attached: " + str(response.itemAttached))
 
-            # wait 3 seconds
+            # Wait 3 seconds
             time.sleep(3)
+            response = check_item_attached()
+            print("item is attached after wait: " + str(response.itemAttached))
 
             # drop item 
-            response = drop_item(100)
+            response = drop_item(timeout_ms)
 
             # check item dropped
             response = check_item_attached()

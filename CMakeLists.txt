@@ -13,7 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
   control_msgs
-  actionlib
   sensor_msgs
   xmlrpcpp
   actionlib_msgs
@@ -113,10 +112,8 @@ catkin_package(
   CATKIN_DEPENDS roscpp
                  message_runtime
                  control_msgs
-                 actionlib
                  sensor_msgs
                  xmlrpcpp
-                 actionlib_msgs
   DEPENDS Franka
 )
 

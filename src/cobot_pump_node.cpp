@@ -20,11 +20,10 @@
 #include "cobot_pump_ros/readState.h"
 #include "cobot_pump_ros/checkItemAttached.h"
 
-using namespace std;
-
-// TODO - make this ip changeable when you create the node, i.e via arguments
 // Instantiate vacuum gripper with our ip address
-franka::VacuumGripper vacuum_gripper("192.168.130.1");
+std::string frankaIP;
+// our franka ip is 192.168.130.1
+//franka::VacuumGripper vacuum_gripper("192.168.130.1");
 
 //------------------------------------------------------------
 //
@@ -32,17 +31,17 @@ franka::VacuumGripper vacuum_gripper("192.168.130.1");
 //
 //------------------------------------------------------------
 bool startPump(cobot_pump_ros::startPump::Request &req, cobot_pump_ros::startPump::Response &res){
-    franka::VacuumGripper vacuum_gripper("192.168.130.1");
+    franka::VacuumGripper vacuum_gripper(frankaIP);
     
     try{
         res.vacuumSuccess = vacuum_gripper.vacuum(req.pressure, std::chrono::milliseconds(req.timeout_ms));
 
     }
     catch(franka::CommandException){
-        cout << "START PUMP - Command exception" << endl;
+        std::cout << "START PUMP - Command exception" << std::endl;
     }
     catch(franka::NetworkException){
-        cout << "START PUMP - Network exception" << endl;
+        std::cout << "START PUMP - Network exception" << std::endl;
     }
 
     // else{
@@ -78,16 +77,16 @@ bool startPump(cobot_pump_ros::startPump::Request &req, cobot_pump_ros::startPum
 //
 //------------------------------------------------------------
 bool stopPump(cobot_pump_ros::stopPump::Request &req, cobot_pump_ros::stopPump::Response &res){
-    franka::VacuumGripper vacuum_gripper("192.168.130.1");
+    franka::VacuumGripper vacuum_gripper(frankaIP);
 
     try{
         res.success = vacuum_gripper.stop();
     }
     catch(franka::CommandException){
-        cout << "STOP PUMP - Command exception" << endl;
+        std::cout << "STOP PUMP - Command exception" << std::endl;
     }
     catch(franka::NetworkException){
-        cout << "STOP PUMP - Network exception" << endl;
+        std::cout << "STOP PUMP - Network exception" << std::endl;
     }
     
     return true;
@@ -99,16 +98,16 @@ bool stopPump(cobot_pump_ros::stopPump::Request &req, cobot_pump_ros::stopPump::
 //
 //------------------------------------------------------------
 bool dropItem(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros::dropItem::Response &res){
-    franka::VacuumGripper vacuum_gripper("192.168.130.1");
+    franka::VacuumGripper vacuum_gripper(frankaIP);
 
     try{
         res.success = vacuum_gripper.dropOff(std::chrono::milliseconds(req.timeout_ms));
     }
     catch(franka::CommandException){
-        cout << "DROP ITEM - Command exception" << endl;
+        std::cout << "DROP ITEM - Command exception" << std::endl;
     }
     catch(franka::NetworkException){
-        cout << "DROP ITEM - Network exception" << endl;
+        std::cout << "DROP ITEM - Network exception" << std::endl;
     }
 
     // Sleep the thread for a small time to allow update to vacuum state
@@ -127,7 +126,7 @@ bool dropItem(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros::dropItem::
 }
 
 bool readState(cobot_pump_ros::readState::Request &req, cobot_pump_ros::readState::Response &res){
-    franka::VacuumGripper vacuum_gripper("192.168.130.1");
+    franka::VacuumGripper vacuum_gripper(frankaIP);
 
     franka::VacuumGripperState vacuum_gripper_state = vacuum_gripper.readOnce();
     std::cout << "vacuum state is: " << vacuum_gripper_state << std::endl;
@@ -138,7 +137,7 @@ bool readState(cobot_pump_ros::readState::Request &req, cobot_pump_ros::readStat
 }
 
 bool checkItemAttached(cobot_pump_ros::checkItemAttached::Request &req, cobot_pump_ros::checkItemAttached::Response &res){
-    franka::VacuumGripper vacuum_gripper("192.168.130.1");
+    franka::VacuumGripper vacuum_gripper(frankaIP);
 
     franka::VacuumGripperState vacuum_gripper_state = vacuum_gripper.readOnce();
     std::cout << "is vacuum in control range?:  " << vacuum_gripper_state.part_present << std::endl;
@@ -149,7 +148,11 @@ bool checkItemAttached(cobot_pump_ros::checkItemAttached::Request &req, cobot_pu
 
 int main(int argc, char **argv){
 
-    cout << "Hello, world!, V2 I have changed this!!! "<< endl;
+    std::cout << "Hello, world!, V2 I have changed this!!! "<< std::endl;
+
+    std::cout << "franka ip is: " << argv[1] << std::endl;
+
+    frankaIP = argv[1];
 
     // Print a vacuum gripper state.
     //franka::VacuumGripperState vacuum_gripper_state = vacuum_gripper.readOnce();
