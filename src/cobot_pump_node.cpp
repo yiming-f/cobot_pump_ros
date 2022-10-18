@@ -148,11 +148,14 @@ bool checkItemAttached(cobot_pump_ros::checkItemAttached::Request &req, cobot_pu
 
 int main(int argc, char **argv){
 
-    std::cout << "Hello, world!, V2 I have changed this!!! "<< std::endl;
-
-    std::cout << "franka ip is: " << argv[1] << std::endl;
+    if (argc != 2) {
+        std::cerr << "Usage: rosrun cobot_pump_ros cobot_pump_node \"franka_ip-address\" " << std::endl;
+        return -1;
+    }
 
     frankaIP = argv[1];
+    std::cout << "franka ip is: " << frankaIP << std::endl;
+   
 
     // Print a vacuum gripper state.
     //franka::VacuumGripperState vacuum_gripper_state = vacuum_gripper.readOnce();
@@ -170,4 +173,6 @@ int main(int argc, char **argv){
     ros::ServiceServer checkItemAttached_Service = n.advertiseService("checkItemAttached", checkItemAttached);
 
     ros::spin();
+
+    return 0;
 }
