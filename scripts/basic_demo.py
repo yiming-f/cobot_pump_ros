@@ -45,8 +45,8 @@ def basic_demo():
 
             # check item dropped
             response = check_item_attached()
-            if(response.itemAttached):
-                print("item has been detahced")
+            if(response.itemAttached == False):
+                print("item has been detached")
             else:
                 print("ERROR: item has not been detached")
 
