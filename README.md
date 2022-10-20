@@ -12,7 +12,7 @@ Turns the vacuum pump on at the desired vacuum strength with a specified timeout
 - timeout_ms - Timeout for the vacuum pump before turning the pump off.
 
 #### Returns
-- vacuumSuccess - true if vacuum estbalished, false otherwise
+- vacuumSuccess - true if vacuum established, false otherwise
 
 ### stopPump
 Stops the vacuum pump.
