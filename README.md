@@ -25,7 +25,7 @@ Ejects any items off the vacuum pump, return true if object is ejcted and false 
 - timeout_ms - Timeout for pump to drop item.
 
 #### Returns
-- success - true if object dropped, false otherwise (BUGGED - always returns false at the moment)
+- success - true if object dropped, false otherwise (BUGGED - returns false despite dropping the object often)
 
 ### readState
 TODO - Will read the state of the vacuum gripper and compose a custom ROS message to be returned.
@@ -37,16 +37,17 @@ Checks whether there is still an object present on the vacuum gripper.
 #### Returns
 - itemAttached - true if object attached to vacuum gripper, false otherwise.
 
-- startPump(vacuumStrength, timeout_ms) - 
-
 ## Demo Scripts
 basic_demo.py Simply turns on the vacuum pump using the startPump service. Then it checks whether it was successful. If an object was grapsed it will wait for 3 seconds, check the status of the pump to see if the object is still being grapsed and then drop the object. Finally it will check if the object is attached after dropping it.
 
 ## Using this package
 
+### Note
+due to the current bug with the drop item service, you should not rely on the return statement for any logical conditions in your code as it often returns false when it should reutrn true,instead use the dropItem service and afterwards call "checkItemAttached" to see if there is any item present on the pump as this works correctly.
+
 ### To run the node
 ```
-rosrun cobot_pump_ros cobot_pump_node
+rosrun cobot_pump_ros cobot_pump_node <ip-address>
 ```
 
 ### To run the demo script
@@ -55,7 +56,7 @@ rosrun cobot_pump_ros basic_demo.py
 ```
 
 ## Authors
-[David Russell](el16dmcr@leeds.ac.uk)
+[David Russell][el16dmcr@leeds.ac.uk]
 
 
 
