@@ -7,7 +7,7 @@ frankaPump::frankaPump(std::string _frankaIP, ros::NodeHandle *n){
     frankaIP = _frankaIP;
 
     // Establish connection to vacuum pump
-    vacuumPump = new franka::VacuumGripper(frankaIP);
+    //vacuumPump = new franka::VacuumGripper(frankaIP);
 
     // Advertise services for the vacuum gripper
     startPump_Service = n->advertiseService("startPump", &frankaPump::startPump, this);
@@ -25,6 +25,7 @@ frankaPump::frankaPump(std::string _frankaIP, ros::NodeHandle *n){
 //
 //------------------------------------------------------------
 bool frankaPump::startPump(cobot_pump_ros::startPump::Request &req, cobot_pump_ros::startPump::Response &res){
+    vacuumPump = new franka::VacuumGripper(frankaIP);
     
     try{
         res.vacuumSuccess = vacuumPump->vacuum(req.pressure, std::chrono::milliseconds(req.timeout_ms));
@@ -40,6 +41,8 @@ bool frankaPump::startPump(cobot_pump_ros::startPump::Request &req, cobot_pump_r
     if(res.vacuumSuccess == false){
         vacuumPump->stop();
     }
+
+    vacuumPump->~VacuumGripper();
     
     return true;
 }
@@ -50,6 +53,7 @@ bool frankaPump::startPump(cobot_pump_ros::startPump::Request &req, cobot_pump_r
 //
 //------------------------------------------------------------
 bool frankaPump::stopPump(cobot_pump_ros::stopPump::Request &req, cobot_pump_ros::stopPump::Response &res){
+    vacuumPump = new franka::VacuumGripper(frankaIP);
 
     try{
         res.success = vacuumPump->stop();
@@ -60,6 +64,8 @@ bool frankaPump::stopPump(cobot_pump_ros::stopPump::Request &req, cobot_pump_ros
     catch(franka::NetworkException){
         std::cout << "STOP PUMP - Network exception" << std::endl;
     }
+
+    vacuumPump->~VacuumGripper();
     
     return true;
 }
@@ -70,6 +76,7 @@ bool frankaPump::stopPump(cobot_pump_ros::stopPump::Request &req, cobot_pump_ros
 //
 //------------------------------------------------------------
 bool frankaPump::dropItem(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros::dropItem::Response &res){
+    vacuumPump = new franka::VacuumGripper(frankaIP);
 
     try{
         res.success = vacuumPump->dropOff(std::chrono::milliseconds(req.timeout_ms));
@@ -81,6 +88,8 @@ bool frankaPump::dropItem(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros
         std::cout << "DROP ITEM - Network exception" << std::endl;
     }
 
+    vacuumPump->~VacuumGripper();
+
     return true;
 }
 
@@ -90,13 +99,15 @@ bool frankaPump::dropItem(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros
 //
 //------------------------------------------------------------
 bool frankaPump::readState(cobot_pump_ros::readState::Request &req, cobot_pump_ros::readState::Response &res){
+    vacuumPump = new franka::VacuumGripper(frankaIP);
 
     franka::VacuumGripperState vacuum_gripper_state = vacuumPump->readOnce();
     std::cout << "vacuum state is: " << vacuum_gripper_state << std::endl;
     res.itemAttached = vacuum_gripper_state.part_present;
 
-    return true;
+    vacuumPump->~VacuumGripper();
 
+    return true;
 }
 
 //------------------------------------------------------------
@@ -105,6 +116,9 @@ bool frankaPump::readState(cobot_pump_ros::readState::Request &req, cobot_pump_r
 //
 //------------------------------------------------------------
 bool frankaPump::checkItemAttached(cobot_pump_ros::checkItemAttached::Request &req, cobot_pump_ros::checkItemAttached::Response &res){
+    vacuumPump = new franka::VacuumGripper(frankaIP);
+    //franka::VacuumGripper vacuumPump(frankaIP);
+
     res.itemAttached  = false;
 
     franka::VacuumGripperState vacuum_gripper_state = vacuumPump->readOnce();
@@ -115,6 +129,8 @@ bool frankaPump::checkItemAttached(cobot_pump_ros::checkItemAttached::Request &r
     if(vacuum_gripper_state.vacuum >= VACUUM_THRESHOLD_ITEM_ATTACHED){
         res.itemAttached = true;
     }
+
+    vacuumPump->~VacuumGripper();
 
     return true;
 }
