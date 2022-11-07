@@ -46,9 +46,7 @@ basic_demo.py Simply turns on the vacuum pump using the startPump service. Then 
 due to the current bug with the drop item service, you should not rely on the return statement for any logical conditions in your code as it often returns false when it should reutrn true,instead use the dropItem service and afterwards call "checkItemAttached" to see if there is any item present on the pump as this works correctly.
 
 ### To run the node
-```
-rosrun cobot_pump_ros cobot_pump_node <ip-address>
-```
+Use a launch file to launch the cobot_pump_node executable using the ROS parameter server to tell the script the ip-address o your franka-panda robot. An example of this cn be seen in the lunch folder under "example.launch"
 
 ### To run the demo script
 ```

@@ -6,16 +6,12 @@
 frankaPump::frankaPump(std::string _frankaIP, ros::NodeHandle *n){
     frankaIP = _frankaIP;
 
-    // Establish connection to vacuum pump
-    //vacuumPump = new franka::VacuumGripper(frankaIP);
-
     // Advertise services for the vacuum gripper
     startPump_Service = n->advertiseService("startPump", &frankaPump::startPump, this);
     stopPump_Service = n->advertiseService("stopPump", &frankaPump::stopPump, this);
     dropItem_Service = n->advertiseService("dropItem", &frankaPump::dropItem, this);
     readState_Service = n->advertiseService("readState", &frankaPump::readState, this);
     checkItemAttached_Service = n->advertiseService("checkItemAttached", &frankaPump::checkItemAttached, this);
-
 
 }
 
