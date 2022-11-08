@@ -121,25 +121,12 @@ catkin_package(
 #   src/cobot_pump.cpp
 # )
 
-add_executable(cobot_pump
-  src/cobot_pump.cpp
-)
-
 add_executable(cobot_pump_node
   src/cobot_pump_node.cpp
 )
 
-add_dependencies(cobot_pump
-  ${catkin_EXPORTED_TARGETS}
-)
-
 add_dependencies(cobot_pump_node
   ${catkin_EXPORTED_TARGETS}
-)
-
-target_link_libraries(cobot_pump
-  ${Franka_LIBRARIES}
-  ${catkin_LIBRARIES}
 )
 
 target_link_libraries(cobot_pump_node
@@ -147,18 +134,9 @@ target_link_libraries(cobot_pump_node
   ${catkin_LIBRARIES}
 )
 
-target_include_directories(cobot_pump SYSTEM PUBLIC
-  ${Franka_INCLUDE_DIRS}
-  ${catkin_INCLUDE_DIRS}
-)
-
 target_include_directories(cobot_pump_node SYSTEM PUBLIC
   ${Franka_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-)
-
-target_include_directories(cobot_pump PUBLIC
-  include
 )
 
 target_include_directories(cobot_pump_node PUBLIC
