@@ -46,6 +46,6 @@ class frankaPump{
         ros::ServiceServer checkItemAttached_Service;
 
         // Defining vacuumPump object to be instantiated in constructor
-        franka::VacuumGripper* vacuumPump;
+        //franka::VacuumGripper vacuumPump = franka::VacuumGripper("panda-control");
         
 };

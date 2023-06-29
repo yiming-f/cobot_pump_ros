@@ -17,7 +17,7 @@ bool drop(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros::dropItem::Resp
     	res.success = vacuum_gripper.dropOff(std::chrono::milliseconds(req.timeout_ms));
     } catch(franka::Exception const& e) {
     	std::cout << "Drop Exception: " << e.what() << std::endl;
-	return false;
+	    return false;
     }
 
     return true;
@@ -25,10 +25,10 @@ bool drop(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros::dropItem::Resp
 
 bool stop(cobot_pump_ros::stopPump::Request &req, cobot_pump_ros::stopPump::Response &res) {
     try {
-	res.success = vacuum_gripper.stop();
+	    res.success = vacuum_gripper.stop();
     } catch(franka::Exception const& e) {
     	std::cout << "Stop Exception: " << e.what() << std::endl;
-	return false;
+	    return false;
     }
 
     return true;
@@ -38,7 +38,7 @@ franka::VacuumGripperState state(cobot_pump_ros::readState::Request &req, cobot_
     franka::VacuumGripperState vacuum_gripper_state;
     try {
         vacuum_gripper_state = vacuum_gripper.readOnce();
-	res.itemAttached = vacuum_gripper_state.part_present;
+	    res.itemAttached = vacuum_gripper_state.part_present;
     } catch(franka::Exception const& e) {
     	std::cout << "State Exception: " << e.what() << std::endl;
     }
@@ -49,10 +49,10 @@ franka::VacuumGripperState state(cobot_pump_ros::readState::Request &req, cobot_
 bool start(cobot_pump_ros::startPump::Request &req, cobot_pump_ros::startPump::Response &res) {
     try {
         bool success = vacuum_gripper.vacuum(req.pressure, std::chrono::milliseconds(req.timeout_ms));
-	res.vacuumSuccess = success;
+	    res.vacuumSuccess = success;
     } catch(franka::Exception const& e) {
     	std::cout << "Start Exception: " << e.what() << std::endl;
-	res.vacuumSuccess = false;
+	    res.vacuumSuccess = false;
     }
 
     return true;
