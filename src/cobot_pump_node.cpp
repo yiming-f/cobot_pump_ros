@@ -10,8 +10,7 @@
 #include "cobot_pump_ros/readState.h"
 #include "cobot_pump_ros/checkItemAttached.h"
 
-std::string _frankaIP = ros::param::get("/franka_ip", _frankaIP);
-franka::VacuumGripper vacuum_gripper(_frankaIP);
+franka::VacuumGripper vacuum_gripper("YOUR_IP_HERE");
 
 bool drop(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros::dropItem::Response &res) {
     try {
@@ -67,8 +66,6 @@ int main(int argc, char **argv){
     auto startPump_Service = nh.advertiseService("startPump", start);
     auto stopPump_Service = nh.advertiseService("stopPump", stop);
     auto dropItem_Service = nh.advertiseService("dropItem", drop);
-    //auto readState_Service = nh.advertiseService("readState", state);
-    //checkItemAttached_Service = nh.advertiseService("checkItemAttached", checkItemAttached);
 
     ros::spin();
     return 0;
