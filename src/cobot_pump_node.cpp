@@ -10,7 +10,8 @@
 #include "cobot_pump_ros/readState.h"
 #include "cobot_pump_ros/checkItemAttached.h"
 
-franka::VacuumGripper vacuum_gripper("panda-control");
+std::string _frankaIP = ros::param::get("/franka_ip", _frankaIP);
+franka::VacuumGripper vacuum_gripper(_frankaIP);
 
 bool drop(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros::dropItem::Response &res) {
     try {
