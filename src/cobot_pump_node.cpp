@@ -10,7 +10,7 @@
 #include "cobot_pump_ros/readState.h"
 #include "cobot_pump_ros/checkItemAttached.h"
 
-franka::VacuumGripper vacuum_gripper("YOUR_IP_HERE");
+franka::VacuumGripper vacuum_gripper("172.16.0.2");
 
 bool drop(cobot_pump_ros::dropItem::Request &req, cobot_pump_ros::dropItem::Response &res) {
     try {
